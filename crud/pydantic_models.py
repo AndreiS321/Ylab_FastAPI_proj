@@ -7,7 +7,7 @@ class MenuIn(BaseModel):
 
 
 class MenuOut(BaseModel):
-    id: int
+    id: str
     title: str
     description: str
     submenus_count: int
@@ -15,7 +15,7 @@ class MenuOut(BaseModel):
 
 
 class MenuOutWithoutCount(BaseModel):
-    id: int
+    id: str
     title: str
     description: str
 
@@ -26,7 +26,7 @@ class SubmenuIn(BaseModel):
 
 
 class SubmenuOut(BaseModel):
-    id: int
+    id: str
     menu_id: int
     title: str
     description: str
@@ -34,7 +34,7 @@ class SubmenuOut(BaseModel):
 
 
 class SubmenuOutWithoutCount(BaseModel):
-    id: int
+    id: str
     menu_id: int
     title: str
     description: str
@@ -47,9 +47,9 @@ class DishIn(BaseModel):
 
 
 class DishOut(BaseModel):
-    id: int
+    id: str
     menu_id: int
     submenu_id: int
     title: str
     description: str
-    price: float
+    price: str
