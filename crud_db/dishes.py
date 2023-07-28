@@ -11,12 +11,7 @@ async def get_dish_db_list(submenu_id: int) -> List[DishDC]:
     async with app.database.session_maker() as session:
         stmt = select(Dish).where(Dish.submenu_id == submenu_id)
         answ = (await session.scalars(stmt)).all()
-        dishes_res = [DishDC(id=dish.id,
-                             menu_id=dish.menu_id,
-                             submenu_id=dish.submenu_id,
-                             title=dish.title,
-                             description=dish.description,
-                             price=dish.price)
+        dishes_res = [await Dish.dish_to_dc(dish, session)
                       for dish in answ]
     return dishes_res
 
@@ -27,12 +22,7 @@ async def get_dish_db(dish_id: int) -> DishDC:
         dish = await session.scalar(stmt)
         if not dish:
             return None
-        dish_res = DishDC(id=dish.id,
-                          menu_id=dish.menu_id,
-                          submenu_id=dish.submenu_id,
-                          title=dish.title,
-                          description=dish.description,
-                          price=dish.price)
+        dish_res = await Dish.dish_to_dc(dish, session)
     return dish_res
 
 
@@ -48,12 +38,7 @@ async def create_dish_db(menu_id: int, submenu_id: int,
                     )
         session.add(dish)
         await session.flush()
-        dish_res = DishDC(id=dish.id,
-                          menu_id=dish.menu_id,
-                          submenu_id=dish.submenu_id,
-                          title=dish.title,
-                          description=dish.description,
-                          price=dish.price)
+        dish_res = await Dish.dish_to_dc(dish, session)
         await session.commit()
     return dish_res
 
@@ -69,12 +54,7 @@ async def patch_dish_db(dish_id: int, title: str, description: str, price: float
             .values(title=title, description=description, price=price) \
             .returning(Dish)
         dish_res = await session.scalar(smtm)
-        dish_res = DishDC(id=dish_res.id,
-                          menu_id=dish_res.menu_id,
-                          submenu_id=dish_res.submenu_id,
-                          title=dish_res.title,
-                          description=dish_res.description,
-                          price=dish_res.price)
+        dish_res = await Dish.dish_to_dc(dish_res, session)
         await session.commit()
     return dish_res
 
@@ -85,12 +65,7 @@ async def delete_dish_db(dish_id: int) -> DishDC:
         dish = await session.scalar(stmt)
         if not dish:
             return None
-        dish_res = DishDC(id=dish.id,
-                          menu_id=dish.menu_id,
-                          submenu_id=dish.submenu_id,
-                          title=dish.title,
-                          description=dish.description,
-                          price=dish.price)
+        dish_res = await Dish.dish_to_dc(dish, session)
         smtm = delete(Dish) \
             .where(Dish.id == dish.id) \
             .returning(Dish)
