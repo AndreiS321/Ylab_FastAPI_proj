@@ -1,10 +1,10 @@
 import os
-
+import config
 from dotenv import load_dotenv
 
+import sqlalchemy_base
 from crud import menu, submenu, dishes
-from db import Database
-from sqlalchemy_base import db
+import db
 from app import app, FastAPI
 
 
@@ -15,15 +15,10 @@ def include_routers(app):
 
 
 def start_app(app: "FastAPI"):
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    database = Database(app=app)
-    app.database = database
-    database.connect(db=db)
-
     include_routers(app)
+    app.database = db.Database(app)
+    app.database.connect(sqlalchemy_base.db)
+
 
 
 start_app(app)
