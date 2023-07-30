@@ -35,7 +35,7 @@ docker compose build
 ```
 ## Запуск образа
 ```bash
-docker compose up
+docker compose up -d
 ```
 После запуска образа сразу будет запущен контейнер с тестами, но его можно запустить повторно командой
 ```bash
