@@ -28,3 +28,16 @@ alembic upgrade head
 ```bash
 uvicorn main:app --reload
 ```
+
+## Сборка образа docker-compose
+```bash
+docker compose build
+```
+## Запуск образа
+```bash
+docker compose up
+```
+После запуска образа сразу будет запущен контейнер с тестами, но его можно запустить повторно командой
+```bash
+docker start tests_app
+```
