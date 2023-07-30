@@ -39,8 +39,8 @@ class Menu(db):
         return menu_res
 
 
-def __repr__(self) -> str:
-    return f"Меню {self.title}"
+    def __repr__(self) -> str:
+        return f"Меню {self.title}"
 
 
 class Submenu(db):
