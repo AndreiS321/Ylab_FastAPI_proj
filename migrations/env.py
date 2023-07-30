@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
+import config as env_conf
 from alembic import context
 from models import *
 
@@ -15,16 +15,11 @@ from models import *
 config = context.config
 
 section = config.config_ini_section
-
-dotenv_path = os.path.abspath(os.path.join(os.curdir, '.env'))
-
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
-
-config.set_section_option(section, "db_user", os.environ.get("db_user"))
-config.set_section_option(section, "db_password", os.environ.get("db_password"))
-config.set_section_option(section, "db_host", os.environ.get("db_host"))
-config.set_section_option(section, "db_name", os.environ.get("db_name"))
+config.set_section_option(section, "db_user", os.environ.get("POSTGRES_USER"))
+config.set_section_option(section, "db_password", os.environ.get("POSTGRES_PASSWORD"))
+config.set_section_option(section, "db_host", os.environ.get("POSTGRES_HOST"))
+config.set_section_option(section, "db_port", os.environ.get("POSTGRES_PORT"))
+config.set_section_option(section, "db_name", os.environ.get("POSTGRES_DB"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -36,6 +31,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = db.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+  database:
+    image: postgres:15.1-alpine
+    container_name: db
+
+
+    env_file:
+      - .env
+
+
+  test_database:
+    image: postgres:15.1-alpine
+    container_name: test_database
+
+    command: -p 4321
+    expose:
+      - 4321
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      - database
+    command: ["/app/docker/app.sh"]
+
+
+  tests:
+    container_name: tests_app
+    build:
+      context: .
+      dockerfile: Dockerfile_tests
+
+    env_file:
+      - .env
+    ports:
+      - 8888:8000
+    depends_on:
+      - test_database
+    command: ["/tests/docker/tests.sh"]
+
