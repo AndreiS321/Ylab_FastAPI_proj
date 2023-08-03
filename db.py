@@ -18,11 +18,11 @@ class Database:
     def connect(self, db: DeclarativeBase, is_test: bool = False, *_: list, **__: dict) -> None:
         self.db = db
         if is_test:
-            db_user = os.getenv("db_user_test")
-            db_password = os.getenv("db_password_test")
-            db_host = os.getenv("db_host_test")
-            db_port = os.getenv("db_port_test")
-            db_name = os.getenv("db_name_test")
+            db_user = "postgres"
+            db_password = "postgres"
+            db_host = "test_database"
+            db_port = 4321
+            db_name = "postgres"
         else:
             db_user = os.getenv("POSTGRES_USER")
             db_password = os.getenv("POSTGRES_PASSWORD")
