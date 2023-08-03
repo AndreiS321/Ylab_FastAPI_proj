@@ -3,16 +3,18 @@ services:
   database:
     image: postgres:15.1-alpine
     container_name: db
-
-
     env_file:
       - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
   test_database:
     image: postgres:15.1-alpine
     container_name: test_database
-
     command: -p 4321
     expose:
       - 4321
@@ -20,7 +22,11 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -p 4321 -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
     container_name: app
@@ -32,8 +38,9 @@ services:
     env_file:
       - .env
     depends_on:
-      - database
-    command: ["/app/docker/app.sh"]
+      database:
+        condition: service_healthy
+    command: [ "/app/docker/app.sh" ]
 
 
   tests:
@@ -47,6 +54,7 @@ services:
     ports:
       - 8888:8000
     depends_on:
-      - test_database
-    command: ["/tests/docker/tests.sh"]
+      test_database:
+        condition: service_healthy
+    command: [ "/tests/docker/tests.sh" ]
 
