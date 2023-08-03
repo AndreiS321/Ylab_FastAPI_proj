@@ -18,7 +18,7 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ## Создание файла переменных окружения
-Нужно создать файл .env на уровне main.py по примеру из файла .env.example
+Нужно создать файл .env на уровне main.py по примеру из файла .env.example (можно просто скопировать)
 
 ## Применение миграции
 ```bash
@@ -35,9 +35,9 @@ docker compose build
 ```
 ## Запуск образа
 ```bash
-docker compose up
+docker compose up -d
 ```
 После запуска образа сразу будет запущен контейнер с тестами, но его можно запустить повторно командой
 ```bash
-docker start tests_app
+docker start tests_app -a
 ```
