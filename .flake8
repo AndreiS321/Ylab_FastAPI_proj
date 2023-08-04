@@ -1,4 +1,4 @@
 [flake8]
 max-line-length=120
-ignore=E501,F821
+ignore=E501,F821,W503
 exclude=venv,migrations,.pytest_cache tests\conftest.py
