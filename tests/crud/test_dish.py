@@ -4,18 +4,18 @@ import pytest
 from sqlalchemy import select
 
 from models import Dish
-from tests.crud.utils import create_menu, create_submenu, create_dish
-from tests.test_objects import dish1, submenu1, menu1, dish1_updated
+from tests.crud.utils import create_dish, create_menu, create_submenu
+from tests.test_objects import dish1, dish1_updated, menu1, submenu1
 
-base_url = "/api/v1/menus"
-url_template = Template(base_url + "/${menu_id}/submenus/${submenu_id}/dishes")
+base_url = '/api/v1/menus'
+url_template = Template(base_url + '/${menu_id}/submenus/${submenu_id}/dishes')
 url_template_dish = Template(
-    base_url + "/${menu_id}/submenus/${submenu_id}/dishes/${dish_id}"
+    base_url + '/${menu_id}/submenus/${submenu_id}/dishes/${dish_id}'
 )
 pytestmark = pytest.mark.anyio
 
 
-async def test_get_list(client, session, menu_id: int = None, submenu_id: int = None):
+async def test_get_list(client, session, menu_id: int | None = None, submenu_id: int | None = None):
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
@@ -30,7 +30,7 @@ async def test_get_list(client, session, menu_id: int = None, submenu_id: int = 
 
 
 async def test_get_dish(
-    client, session, menu_id: int = None, submenu_id: int = None, dish_id: int = None
+        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish_id: int | None = None
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -50,11 +50,11 @@ async def test_get_dish(
 
     assert resp.status_code == 200
     json_resp = resp.json()
-    assert json_resp["id"] == str(dish_id) and json_resp["menu_id"] == menu_id
+    assert json_resp['id'] == str(dish_id) and json_resp['menu_id'] == menu_id
 
 
 async def test_create(
-    client, session, menu_id: int = None, submenu_id: int = None, dish: dict = None
+        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish: dict | None = None
 ):
     dish = dish if dish else dish1
     if menu_id is None:
@@ -72,21 +72,21 @@ async def test_create(
     assert resp.status_code == 201
     json_resp = resp.json()
     assert (
-        json_resp["title"] == dish["title"]
-        and json_resp["menu_id"] == menu_id
-        and json_resp["submenu_id"] == submenu_id
-        and json_resp["price"] == dish["price"]
-        and json_resp["description"] == dish["description"]
+        json_resp['title'] == dish['title']
+        and json_resp['menu_id'] == menu_id
+        and json_resp['submenu_id'] == submenu_id
+        and json_resp['price'] == dish['price']
+        and json_resp['description'] == dish['description']
     )
 
 
 async def test_patch(
-    client,
-    session,
-    menu_id: int = None,
-    submenu_id: int = None,
-    dish_id: int = None,
-    dish_updated: dict = None,
+        client,
+        session,
+        menu_id: int | None = None,
+        submenu_id: int | None = None,
+        dish_id: int | None = None,
+        dish_updated: dict | None = None,
 ):
     dish_updated = dish_updated if dish_updated else dish1_updated
     if menu_id is None:
@@ -109,14 +109,14 @@ async def test_patch(
     assert resp.status_code == 200
     json_resp = resp.json()
     assert (
-        json_resp["title"] == dish_updated["title"]
-        and json_resp["description"] == dish_updated["description"]
-        and json_resp["price"] == dish_updated["price"]
+        json_resp['title'] == dish_updated['title']
+        and json_resp['description'] == dish_updated['description']
+        and json_resp['price'] == dish_updated['price']
     )
 
 
 async def test_delete(
-    client, session, menu_id: int = None, submenu_id: int = None, dish_id: int = None
+        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish_id: int | None = None
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)

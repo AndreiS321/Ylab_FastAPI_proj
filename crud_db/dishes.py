@@ -1,7 +1,5 @@
-from typing import List
-
 from fastapi import Depends
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 
 from dataclass import DishDC
 from db import get_session
@@ -12,7 +10,7 @@ class DishesAccessor:
     def __init__(self, session=Depends(get_session)):
         self.session = session
 
-    async def get_list(self, submenu_id: int) -> List[DishDC]:
+    async def get_list(self, submenu_id: int) -> list[DishDC]:
         stmt = select(Dish).where(Dish.submenu_id == submenu_id)
         answ = (await self.session.scalars(stmt)).all()
         dishes_res = [await Dish.dish_to_dc(dish, self.session) for dish in answ]

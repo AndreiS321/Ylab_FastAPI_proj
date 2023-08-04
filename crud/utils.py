@@ -1,45 +1,53 @@
 from crud.pydantic_models import (
     DishOut,
-    SubmenuOut,
-    SubmenuOutWithoutCount,
     MenuOut,
     MenuOutWithoutCount,
+    SubmenuOut,
+    SubmenuOutWithoutCount,
 )
-from dataclass import DishDC, SubmenuDC, MenuDC
+from dataclass import DishDC, MenuDC, SubmenuDC
 
 
 def menuDC_to_pydantic_menu_out(
-    menu: MenuDC, without_count: bool = False
-) -> MenuOut | MenuOutWithoutCount:
-    if without_count:
-        return MenuOutWithoutCount(
-            id=str(menu.id), title=menu.title, description=menu.description
-        )
+    menu: MenuDC
+) -> MenuOut:
     return MenuOut(
         id=str(menu.id),
         title=menu.title,
         description=menu.description,
-        submenus_count=menu.submenus_count,
-        dishes_count=menu.dishes_count,
+        submenus_count=menu.submenus_count,  # type: ignore
+        dishes_count=menu.dishes_count,  # type: ignore
+    )
+
+
+def menuDC_to_pydantic_menu_out_no_count(
+    menu: MenuDC
+) -> MenuOutWithoutCount:
+    return MenuOutWithoutCount(
+        id=str(menu.id), title=menu.title, description=menu.description
     )
 
 
 def submenuDC_to_pydantic_submenu_out(
-    submenu: SubmenuDC, without_count: bool = False
-) -> SubmenuOut | SubmenuOutWithoutCount:
-    if without_count:
-        return SubmenuOutWithoutCount(
-            id=str(submenu.id),
-            menu_id=submenu.menu_id,
-            title=submenu.title,
-            description=submenu.description,
-        )
+    submenu: SubmenuDC
+) -> SubmenuOut:
     return SubmenuOut(
         id=str(submenu.id),
         menu_id=submenu.menu_id,
         title=submenu.title,
         description=submenu.description,
-        dishes_count=submenu.dishes_count,
+        dishes_count=submenu.dishes_count,  # type: ignore
+    )
+
+
+def submenuDC_to_pydantic_submenu_out_no_count(
+    submenu: SubmenuDC
+) -> SubmenuOutWithoutCount:
+    return SubmenuOutWithoutCount(
+        id=str(submenu.id),
+        menu_id=submenu.menu_id,
+        title=submenu.title,
+        description=submenu.description,
     )
 
 

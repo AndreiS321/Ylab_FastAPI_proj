@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import config
 import sqlalchemy_base
 from app import app
-from crud import menu, submenu, dishes
-from db import Database
+from crud import dishes, menu, submenu
+from db import Database  # type: ignore
 
-base_url = "http://127.0.0.1:8000"
+base_url = 'http://127.0.0.1:8000'
 
 config.load_environment_variables()
 app.database = Database(app)
@@ -31,11 +31,11 @@ async def setup_db():
 
 @pytest.fixture()
 async def session() -> AsyncGenerator[AsyncSession, None]:
-    async with app.database.session_maker() as session:
+    async with app.database.session_maker() as session:  # type: ignore
         yield session
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 async def client():
     async with AsyncClient(app=app, base_url=base_url) as client:
         yield client

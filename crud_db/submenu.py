@@ -1,10 +1,8 @@
-from typing import List
-
 from fastapi import Depends
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 
 from dataclass import SubmenuDC
-from db import get_session
+from db import get_session  # type: ignore
 from models import Submenu
 
 
@@ -12,7 +10,7 @@ class SubmenusAccessor:
     def __init__(self, session=Depends(get_session)):
         self.session = session
 
-    async def get_list(self, menu_id: int) -> List[SubmenuDC]:
+    async def get_list(self, menu_id: int) -> list[SubmenuDC]:
         stmt = select(Submenu).where(Submenu.menu_id == menu_id)
         answer = (await self.session.scalars(stmt)).all()
         submenus_res = [
