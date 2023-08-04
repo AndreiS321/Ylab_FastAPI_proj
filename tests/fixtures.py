@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
+
 import config
 import sqlalchemy_base
 from app import app
@@ -11,9 +12,9 @@ from db import Database
 
 base_url = "http://127.0.0.1:8000"
 
+config.load_environment_variables()
 app.database = Database(app)
 app.database.connect(db=sqlalchemy_base.db, is_test=True)
-
 app.include_router(menu.router)
 app.include_router(submenu.router)
 app.include_router(dishes.router)

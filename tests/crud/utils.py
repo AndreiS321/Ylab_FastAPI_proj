@@ -15,7 +15,9 @@ async def create_menu(menu, session: AsyncSession) -> MenuDC:
 
 
 async def create_submenu(submenu, menu_id: int, session: AsyncSession) -> SubmenuDC:
-    submenu = Submenu(title=submenu["title"], description=submenu["description"], menu_id=menu_id)
+    submenu = Submenu(
+        title=submenu["title"], description=submenu["description"], menu_id=menu_id
+    )
     session.add(submenu)
     await session.flush()
     submenu = await submenu.submenu_to_dc(submenu, session)
@@ -23,9 +25,16 @@ async def create_submenu(submenu, menu_id: int, session: AsyncSession) -> Submen
     return submenu
 
 
-async def create_dish(dish, menu_id: int, submenu_id: int, session: AsyncSession) -> DishDC:
-    dish = Dish(title=dish["title"], description=dish["description"], menu_id=menu_id, submenu_id=submenu_id,
-                price=float(dish["price"]))
+async def create_dish(
+    dish, menu_id: int, submenu_id: int, session: AsyncSession
+) -> DishDC:
+    dish = Dish(
+        title=dish["title"],
+        description=dish["description"],
+        menu_id=menu_id,
+        submenu_id=submenu_id,
+        price=float(dish["price"]),
+    )
     session.add(dish)
     await session.flush()
     dish = await dish.dish_to_dc(dish, session)
