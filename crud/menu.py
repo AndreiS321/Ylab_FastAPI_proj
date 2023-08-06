@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 
-from crud.pydantic_models import MenuIn, MenuOut, MenuOutWithoutCount
-from crud.utils import menuDC_to_pydantic_menu_out, menuDC_to_pydantic_menu_out_no_count
+from crud.pydantic_models import MenuIn, MenuOut
+from crud.utils import menuDC_to_pydantic_menu_out
 from crud_db.menu import MenusAccessor
 
 from .routers import router_menus as router
@@ -27,9 +27,9 @@ async def get_menu(
 @router.post('/', status_code=201)
 async def add_menu(
     menu: MenuIn, accessor: MenusAccessor = Depends(MenusAccessor)
-) -> MenuOutWithoutCount:
+) -> MenuOut:
     res = await accessor.create(title=menu.title, description=menu.description)
-    return menuDC_to_pydantic_menu_out_no_count(res)
+    return menuDC_to_pydantic_menu_out(res)
 
 
 @router.patch('/{menu_id}')

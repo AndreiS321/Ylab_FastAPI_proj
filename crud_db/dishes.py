@@ -1,31 +1,37 @@
-from fastapi import Depends
 from sqlalchemy import delete, select, update
 
+from crud_db.utils import (
+    BaseAccessor,
+    cache_delete,
+    cache_get,
+    cache_get_all,
+    cache_post,
+)
 from dataclass import DishDC
-from db import get_session
 from models import Dish
 
 
-class DishesAccessor:
-    def __init__(self, session=Depends(get_session)):
-        self.session = session
+class DishesAccessor(BaseAccessor):
 
+    @cache_get_all(1)
     async def get_list(self, submenu_id: int) -> list[DishDC]:
         stmt = select(Dish).where(Dish.submenu_id == submenu_id)
-        answ = (await self.session.scalars(stmt)).all()
-        dishes_res = [await Dish.dish_to_dc(dish, self.session) for dish in answ]
+        answ = (await self._session.scalars(stmt)).all()
+        dishes_res = [await Dish.dish_to_dc(dish, self._session) for dish in answ]
         return dishes_res
 
+    @cache_get(1)
     async def get(self, **kwargs) -> DishDC | None:
         stmt = select(Dish).filter_by(**kwargs)
-        dish = await self.session.scalar(stmt)
+        dish = await self._session.scalar(stmt)
         if not dish:
             return None
-        dish_res = await Dish.dish_to_dc(dish, self.session)
+        dish_res = await Dish.dish_to_dc(dish, self._session)
         return dish_res
 
+    @cache_post(1)
     async def create(
-        self, menu_id: int, submenu_id: int, title: str, description: str, price: float
+            self, menu_id: int, submenu_id: int, title: str, description: str, price: float
     ) -> DishDC:
         dish = Dish(
             menu_id=menu_id,
@@ -34,17 +40,18 @@ class DishesAccessor:
             description=description,
             price=price,
         )
-        self.session.add(dish)
-        await self.session.flush()
-        dish_res = await Dish.dish_to_dc(dish, self.session)
-        await self.session.commit()
+        self._session.add(dish)
+        await self._session.flush()
+        dish_res = await Dish.dish_to_dc(dish, self._session)
+        await self._session.commit()
         return dish_res
 
+    @cache_post(1)
     async def patch(
-        self, dish_id: int, title: str, description: str, price: float
+            self, dish_id: int, title: str, description: str, price: float
     ) -> DishDC | None:
         stmt = select(Dish).where(Dish.id == dish_id)
-        submenu = await self.session.scalar(stmt)
+        submenu = await self._session.scalar(stmt)
         if not submenu:
             return None
         smtm = (
@@ -53,18 +60,19 @@ class DishesAccessor:
             .values(title=title, description=description, price=price)
             .returning(Dish)
         )
-        dish_res = await self.session.scalar(smtm)
-        dish_res = await Dish.dish_to_dc(dish_res, self.session)
-        await self.session.commit()
+        dish_res = await self._session.scalar(smtm)
+        dish_res = await Dish.dish_to_dc(dish_res, self._session)
+        await self._session.commit()
         return dish_res
 
+    @cache_delete
     async def delete(self, dish_id: int) -> DishDC | None:
         stmt = select(Dish).where(Dish.id == dish_id)
-        dish = await self.session.scalar(stmt)
+        dish = await self._session.scalar(stmt)
         if not dish:
             return None
-        dish_res = await Dish.dish_to_dc(dish, self.session)
+        dish_res = await Dish.dish_to_dc(dish, self._session)
         smtm = delete(Dish).where(Dish.id == dish.id).returning(Dish)
-        await self.session.execute(smtm)
-        await self.session.commit()
+        await self._session.execute(smtm)
+        await self._session.commit()
         return dish_res

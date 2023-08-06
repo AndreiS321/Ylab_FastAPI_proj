@@ -1,10 +1,7 @@
 from fastapi import Depends, HTTPException
 
-from crud.pydantic_models import SubmenuIn, SubmenuOut, SubmenuOutWithoutCount
-from crud.utils import (
-    submenuDC_to_pydantic_submenu_out,
-    submenuDC_to_pydantic_submenu_out_no_count,
-)
+from crud.pydantic_models import SubmenuIn, SubmenuOut
+from crud.utils import submenuDC_to_pydantic_submenu_out
 from crud_db.submenu import SubmenusAccessor
 
 from .routers import router_submenus as router
@@ -35,11 +32,11 @@ async def add_submenu(
     menu_id: int,
     submenu: SubmenuIn,
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
-) -> SubmenuOutWithoutCount:
+) -> SubmenuOut:
     res = await accessor.create(
         menu_id=menu_id, title=submenu.title, description=submenu.description
     )
-    return submenuDC_to_pydantic_submenu_out_no_count(res)
+    return submenuDC_to_pydantic_submenu_out(res)
 
 
 @router.patch('/{submenu_id}')

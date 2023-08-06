@@ -5,6 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import config
+import db
 import sqlalchemy_base
 from app import app
 from crud import dishes, menu, submenu
@@ -15,6 +16,7 @@ base_url = 'http://127.0.0.1:8000'
 config.load_environment_variables()
 app.database = Database(app)
 app.database.connect(db=sqlalchemy_base.db, is_test=True)
+db.init_redis(app)
 app.include_router(menu.router)
 app.include_router(submenu.router)
 app.include_router(dishes.router)

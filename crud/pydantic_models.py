@@ -14,12 +14,6 @@ class MenuOut(BaseModel):
     dishes_count: int
 
 
-class MenuOutWithoutCount(BaseModel):
-    id: str
-    title: str
-    description: str
-
-
 class SubmenuIn(BaseModel):
     title: str
     description: str
@@ -31,13 +25,6 @@ class SubmenuOut(BaseModel):
     title: str
     description: str
     dishes_count: int
-
-
-class SubmenuOutWithoutCount(BaseModel):
-    id: str
-    menu_id: int
-    title: str
-    description: str
 
 
 class DishIn(BaseModel):

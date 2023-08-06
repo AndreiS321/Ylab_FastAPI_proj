@@ -2,6 +2,8 @@
 import os
 from typing import TYPE_CHECKING, AsyncGenerator
 
+import aioredis
+from aioredis import Redis
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -36,7 +38,7 @@ class Database:
         else:
             db_user: str | None = os.getenv('POSTGRES_USER', default='postgres')
             db_password: str | None = os.getenv('POSTGRES_PASSWORD', default='postgres')
-            db_host: str | None = os.getenv('POSTGRES_HOST', default='postgres')
+            db_host: str | None = os.getenv('POSTGRES_HOST', default='database')
             db_port: str | None = os.getenv('POSTGRES_PORT', default=5432)
             db_name: str | None = os.getenv('POSTGRES_DB', default='postgres')
 
@@ -49,3 +51,14 @@ class Database:
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with app.database.session_maker() as session:
         yield session
+
+
+def init_redis(app: 'FastAPI'):
+    host = os.environ.get('REDIS_HOST', 'localhost')
+    redis = aioredis.from_url(f'redis://{host}')
+    app.redis = redis
+
+
+async def get_redis_conn() -> AsyncGenerator[Redis, None]:
+    async with app.redis.client() as conn:
+        yield conn

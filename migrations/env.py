@@ -2,24 +2,26 @@ import asyncio
 import os
 from logging.config import fileConfig
 
-from dotenv import load_dotenv
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
 import config as env_conf
-from alembic import context
 from models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
+env_conf.load_environment_variables()
+
 section = config.config_ini_section
-config.set_section_option(section, "db_user", os.environ.get("POSTGRES_USER"))
-config.set_section_option(section, "db_password", os.environ.get("POSTGRES_PASSWORD"))
-config.set_section_option(section, "db_host", os.environ.get("POSTGRES_HOST"))
-config.set_section_option(section, "db_port", os.environ.get("POSTGRES_PORT"))
-config.set_section_option(section, "db_name", os.environ.get("POSTGRES_DB"))
+config.set_section_option(section, 'db_user', os.environ.get('POSTGRES_USER'))
+config.set_section_option(section, 'db_password', os.environ.get('POSTGRES_PASSWORD'))
+config.set_section_option(section, 'db_host', os.environ.get('POSTGRES_HOST'))
+config.set_section_option(section, 'db_port', os.environ.get('POSTGRES_PORT'))
+config.set_section_option(section, 'db_name', os.environ.get('POSTGRES_DB'))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -51,12 +53,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -78,7 +80,7 @@ async def run_async_migrations() -> None:
 
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 
