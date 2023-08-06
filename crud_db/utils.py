@@ -13,7 +13,7 @@ def get_cache_name(class_name, *args, **kwargs):
         + ''.join(str(i) + str(j) for i, j in kwargs.items())
     )
 
-
+# Кэш запросов к спискам объектов
 def cache_get_all(seconds: int = 10):
     def wrapper1(func):
         async def wrapper2(self, *args, **kwargs):
@@ -37,7 +37,7 @@ def cache_get_all(seconds: int = 10):
 
     return wrapper1
 
-
+# Кэш запросов к определённому объекту
 def cache_get(seconds: int = 10):
     def wrapper1(func):
         async def wrapper2(self, *args, **kwargs):
@@ -58,7 +58,7 @@ def cache_get(seconds: int = 10):
 
     return wrapper1
 
-
+# Обновление кэша при добавлении объекта
 def cache_post(seconds: int = 10):
     def wrapper1(func):
         async def wrapper2(self, *args, **kwargs):
@@ -74,7 +74,7 @@ def cache_post(seconds: int = 10):
 
     return wrapper1
 
-
+# Удаление кэша при добавлении объекта
 def cache_delete(func):
     async def wrapper2(self, *args, **kwargs):
         result = await func(self, *args, **kwargs)
