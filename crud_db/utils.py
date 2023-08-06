@@ -5,25 +5,6 @@ from fastapi import Depends
 from app import app
 from db import get_session
 
-# class CacheMeta(type):
-#     def __new__(cls, name, bases, dct):
-#         for name, value in dct.items():
-#             if isinstance(value, types.FunctionType) and not name.startswith('_'):
-#                 dct[name] = decor(123)(value)
-#                 print(name)
-#         return super().__new__(cls, name, bases, dct)
-
-
-# def decor(s=1):
-#     def wrapper1(func):
-#         def wrapper(*args, **kwargs):
-#             print(s)
-#             print(func)
-#             return func(*args, **kwargs)
-#         return wrapper
-#
-#     return wrapper1
-
 
 def get_cache_name(class_name, *args, **kwargs):
     return (
