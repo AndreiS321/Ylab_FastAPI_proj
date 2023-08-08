@@ -19,9 +19,11 @@ async def get_submenu_list(
 
 @router.get('/{submenu_id}')
 async def get_submenu(
-    submenu_id: int, accessor: SubmenusAccessor = Depends(SubmenusAccessor)
+    menu_id: int,
+    submenu_id: int,
+    accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
-    res = await accessor.get(id=submenu_id)
+    res = await accessor.get(menu_id=menu_id, submenu_id=submenu_id)
     if not res:
         raise HTTPException(status_code=404, detail='submenu not found')
     return submenuDC_to_pydantic_submenu_out(res)
@@ -34,19 +36,25 @@ async def add_submenu(
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
     res = await accessor.create(
-        menu_id=menu_id, title=submenu.title, description=submenu.description
+        submenu.title,
+        submenu.description,
+        menu_id=menu_id,
     )
     return submenuDC_to_pydantic_submenu_out(res)
 
 
 @router.patch('/{submenu_id}')
 async def patch_submenu(
+    menu_id: int,
     submenu_id: int,
     submenu: SubmenuIn,
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
     res = await accessor.patch(
-        submenu_id=submenu_id, title=submenu.title, description=submenu.description
+        submenu.title,
+        submenu.description,
+        menu_id=menu_id,
+        submenu_id=submenu_id,
     )
     if not res:
         raise HTTPException(status_code=404, detail='submenu not found')
@@ -55,9 +63,11 @@ async def patch_submenu(
 
 @router.delete('/{submenu_id}')
 async def delete_submenu(
-    submenu_id: int, accessor: SubmenusAccessor = Depends(SubmenusAccessor)
+    menu_id: int,
+    submenu_id: int,
+    accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
-    res = await accessor.delete(submenu_id=submenu_id)
+    res = await accessor.delete(menu_id=menu_id, submenu_id=submenu_id)
     if not res:
         raise HTTPException(status_code=404, detail='submenu not found')
     return submenuDC_to_pydantic_submenu_out(res)

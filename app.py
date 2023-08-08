@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from aioredis import Redis
 from fastapi import FastAPI as FastAPIApp
@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
 
 class FastAPI(FastAPIApp):
-    database: Optional['Database'] = None
-    redis: Optional['Redis'] = None
+    database: 'Database'
+    redis: 'Redis'
 
 
 app = FastAPI()

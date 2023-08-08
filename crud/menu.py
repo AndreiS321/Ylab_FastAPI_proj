@@ -18,7 +18,7 @@ async def get_menu_list(
 async def get_menu(
     menu_id: int, accessor: MenusAccessor = Depends(MenusAccessor)
 ) -> MenuOut:
-    res = await accessor.get(id=menu_id)
+    res = await accessor.get(menu_id=menu_id)
     if not res:
         raise HTTPException(status_code=404, detail='menu not found')
     return menuDC_to_pydantic_menu_out(res)
@@ -28,7 +28,7 @@ async def get_menu(
 async def add_menu(
     menu: MenuIn, accessor: MenusAccessor = Depends(MenusAccessor)
 ) -> MenuOut:
-    res = await accessor.create(title=menu.title, description=menu.description)
+    res = await accessor.create(menu.title, menu.description)
     return menuDC_to_pydantic_menu_out(res)
 
 
@@ -37,7 +37,9 @@ async def patch_menu(
     menu_id: int, menu: MenuIn, accessor: MenusAccessor = Depends(MenusAccessor)
 ) -> MenuOut:
     res = await accessor.patch(
-        menu_id=menu_id, title=menu.title, description=menu.description
+        menu.title,
+        menu.description,
+        menu_id=menu_id,
     )
     if not res:
         raise HTTPException(status_code=404, detail='menu not found')

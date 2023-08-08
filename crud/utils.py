@@ -2,9 +2,7 @@ from crud.pydantic_models import DishOut, MenuOut, SubmenuOut
 from dataclass import DishDC, MenuDC, SubmenuDC
 
 
-def menuDC_to_pydantic_menu_out(
-        menu: MenuDC | dict
-) -> MenuOut:
+def menuDC_to_pydantic_menu_out(menu: MenuDC | dict) -> MenuOut:
     menu = menu if isinstance(menu, MenuDC) else MenuDC.dict_to_dc(menu)
     return MenuOut(
         id=str(menu.id),
@@ -15,10 +13,10 @@ def menuDC_to_pydantic_menu_out(
     )
 
 
-def submenuDC_to_pydantic_submenu_out(
-        submenu: SubmenuDC | dict
-) -> SubmenuOut:
-    submenu = submenu if isinstance(submenu, SubmenuDC) else SubmenuDC.dict_to_dc(submenu)
+def submenuDC_to_pydantic_submenu_out(submenu: SubmenuDC | dict) -> SubmenuOut:
+    submenu = (
+        submenu if isinstance(submenu, SubmenuDC) else SubmenuDC.dict_to_dc(submenu)
+    )
     return SubmenuOut(
         id=str(submenu.id),
         menu_id=submenu.menu_id,

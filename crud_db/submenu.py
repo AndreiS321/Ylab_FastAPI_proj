@@ -12,6 +12,8 @@ from models import Submenu
 
 
 class SubmenusAccessor(BaseAccessor):
+    dataclass = SubmenuDC
+
     @cache_get_all(1)
     async def get_list(self, menu_id: int) -> list[SubmenuDC]:
         stmt = select(Submenu).where(Submenu.menu_id == menu_id)
@@ -22,8 +24,8 @@ class SubmenusAccessor(BaseAccessor):
         return submenus_res
 
     @cache_get(1)
-    async def get(self, **kwargs) -> SubmenuDC | None:
-        stmt = select(Submenu).filter_by(**kwargs)
+    async def get(self, menu_id: int, submenu_id: int) -> SubmenuDC | None:
+        stmt = select(Submenu).filter_by(id=submenu_id)
         submenu = await self._session.scalar(stmt)
         if not submenu:
             return None
@@ -31,7 +33,7 @@ class SubmenusAccessor(BaseAccessor):
         return submenu_res
 
     @cache_post(1)
-    async def create(self, menu_id: int, title: str, description: str) -> SubmenuDC:
+    async def create(self, title: str, description: str, menu_id: int) -> SubmenuDC:
         submenu = Submenu(menu_id=menu_id, title=title, description=description)
         self._session.add(submenu)
         await self._session.flush()
@@ -41,7 +43,7 @@ class SubmenusAccessor(BaseAccessor):
 
     @cache_post(1)
     async def patch(
-            self, submenu_id: int, title: str, description: str
+        self, title: str, description: str, menu_id: int, submenu_id: int
     ) -> SubmenuDC | None:
         stmt = select(Submenu).where(Submenu.id == submenu_id)
         submenu = await self._session.scalar(stmt)
@@ -59,7 +61,7 @@ class SubmenusAccessor(BaseAccessor):
         return submenu_res
 
     @cache_delete
-    async def delete(self, submenu_id: int) -> SubmenuDC | None:
+    async def delete(self, menu_id: int, submenu_id: int) -> SubmenuDC | None:
         stmt = select(Submenu).where(Submenu.id == submenu_id)
         submenu = await self._session.scalar(stmt)
         if not submenu:

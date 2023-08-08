@@ -12,6 +12,8 @@ from models import Menu
 
 
 class MenusAccessor(BaseAccessor):
+    dataclass = MenuDC
+
     @cache_get_all(1)
     async def get_list(self) -> list[MenuDC]:
         stmt = select(Menu)
@@ -20,8 +22,8 @@ class MenusAccessor(BaseAccessor):
         return menus_res
 
     @cache_get(1)
-    async def get(self, **kwargs) -> MenuDC | None:
-        stmt = select(Menu).filter_by(**kwargs)
+    async def get(self, menu_id: int) -> MenuDC | None:
+        stmt = select(Menu).filter_by(id=menu_id)
         menu = await self._session.scalar(stmt)
         if not menu:
             return None
@@ -44,7 +46,7 @@ class MenusAccessor(BaseAccessor):
         return menu_res
 
     @cache_post(1)
-    async def patch(self, menu_id: int, title: str, description) -> MenuDC | None:
+    async def patch(self, title: str, description, menu_id: int) -> MenuDC | None:
         stmt = select(Menu).where(Menu.id == menu_id)
         menu = await self._session.scalar(stmt)
         if not menu:
