@@ -10,8 +10,8 @@ class MenuOut(BaseModel):
     id: str
     title: str
     description: str
-    submenus_count: int
-    dishes_count: int
+    submenus_count: int | None = None
+    dishes_count: int | None = None
 
     @property
     def as_json(self):
@@ -32,7 +32,7 @@ class SubmenuOut(BaseModel):
     menu_id: int
     title: str
     description: str
-    dishes_count: int
+    dishes_count: int | None = None
 
     @property
     def as_json(self):
@@ -66,5 +66,11 @@ class DishOut(BaseModel):
         return self.model_dump(mode='python')
 
 
-# class ObjectsList(BaseModel):
-#     Men
+class SubmenuOutList(BaseModel):
+    submenu: SubmenuOut | None = None
+    dishes: list[DishOut] = []
+
+
+class MenuOutList(BaseModel):
+    menu: MenuOut | None = None
+    submenus: list[SubmenuOutList] = []

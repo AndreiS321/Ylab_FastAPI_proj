@@ -2,13 +2,14 @@ import config
 import db
 import sqlalchemy_base
 from app import FastAPI, app
-from crud import dishes, menu, submenu
+from crud import common, dishes, menu, submenu
 
 
 def include_routers(app: 'FastAPI'):
     app.include_router(menu.router)
     app.include_router(submenu.router)
     app.include_router(dishes.router)
+    app.include_router(common.router)
 
 
 def start_app(app: 'FastAPI'):

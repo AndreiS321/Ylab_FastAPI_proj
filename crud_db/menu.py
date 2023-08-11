@@ -9,14 +9,14 @@ from models import Menu
 class MenusAccessor(BaseAccessor):
     pydantic_model = MenuOut
 
-    @cache_get_all(1)
+    @cache_get_all(20)
     async def get_list(self) -> list[MenuOut]:
         stmt = select(Menu)
         answ = (await self._session.scalars(stmt)).all()
         menus_res = [await menu.to_pydantic_model(self._session) for menu in answ]
         return menus_res
 
-    @cache_get(1)
+    @cache_get(20)
     async def get(self, menu_id: int) -> MenuOut | None:
         stmt = select(Menu).filter_by(id=menu_id)
         menu = await self._session.scalar(stmt)
@@ -25,7 +25,7 @@ class MenusAccessor(BaseAccessor):
         menu_res = await menu.to_pydantic_model(self._session)
         return menu_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def create(self, title: str, description: str) -> MenuOut:
         menu = Menu(title=title, description=description)
         self._session.add(menu)
@@ -34,7 +34,7 @@ class MenusAccessor(BaseAccessor):
         await self._session.commit()
         return menu_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def patch(self, title: str, description, menu_id: int) -> MenuOut | None:
         stmt = select(Menu).where(Menu.id == menu_id)
         menu = await self._session.scalar(stmt)

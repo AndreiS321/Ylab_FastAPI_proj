@@ -21,23 +21,31 @@ class Menu(db):
         back_populates='menu', cascade='all, delete-orphan'
     )
 
-    async def to_pydantic_model(self, session: AsyncSession) -> MenuOut:
-        smtm = (
-            select(func.count(distinct(Submenu.id)), func.count(Dish.id))
-            .select_from(Menu)
-            .join(Submenu, Submenu.menu_id == Menu.id)
-            .join(Dish, Dish.menu_id == Menu.id, isouter=True)
-            .where(Menu.id == self.id)
-        )
-        count = (await session.execute(smtm)).one()
-        menu_res = MenuOut(
+    async def to_pydantic_model(
+        self, session: AsyncSession, with_count=True
+    ) -> MenuOut:
+        if with_count:
+            smtm = (
+                select(func.count(distinct(Submenu.id)), func.count(Dish.id))
+                .select_from(Menu)
+                .join(Submenu, Submenu.menu_id == Menu.id)
+                .join(Dish, Dish.menu_id == Menu.id, isouter=True)
+                .where(Menu.id == self.id)
+            )
+            count = (await session.execute(smtm)).one()
+            menu_res = MenuOut(
+                id=str(self.id),
+                title=self.title,
+                description=self.description,
+                submenus_count=count[0],
+                dishes_count=count[1],
+            )
+            return menu_res
+        return MenuOut(
             id=str(self.id),
             title=self.title,
             description=self.description,
-            submenus_count=count[0],
-            dishes_count=count[1],
         )
-        return menu_res
 
     def __repr__(self) -> str:
         return f'Меню {self.title}'
@@ -58,23 +66,32 @@ class Submenu(db):
         back_populates='submenu', cascade='all, delete-orphan'
     )
 
-    async def to_pydantic_model(self, session: AsyncSession) -> SubmenuOut:
-        smtm = (
-            select(func.count(Dish.id))
-            .select_from(Submenu)
-            .join(Dish, Dish.submenu_id == Submenu.id)
-            .where(Submenu.id == self.id)
-        )
-        count = (await session.execute(smtm)).one()
+    async def to_pydantic_model(
+        self, session: AsyncSession, with_count=True
+    ) -> SubmenuOut:
+        if with_count:
+            smtm = (
+                select(func.count(Dish.id))
+                .select_from(Submenu)
+                .join(Dish, Dish.submenu_id == Submenu.id)
+                .where(Submenu.id == self.id)
+            )
+            count = (await session.execute(smtm)).one()
 
-        submenu_res = SubmenuOut(
+            submenu_res = SubmenuOut(
+                id=str(self.id),
+                menu_id=self.menu_id,
+                title=self.title,
+                description=self.description,
+                dishes_count=count[0],
+            )
+            return submenu_res
+        return SubmenuOut(
             id=str(self.id),
             menu_id=self.menu_id,
             title=self.title,
             description=self.description,
-            dishes_count=count[0],
         )
-        return submenu_res
 
     def __repr__(self) -> str:
         return f'Подменю {self.title}'

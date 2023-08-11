@@ -8,7 +8,7 @@ import config
 import db
 import sqlalchemy_base
 from app import app
-from crud import dishes, menu, submenu
+from crud import common, dishes, menu, submenu
 from db import Database  # type: ignore
 
 base_url = 'http://127.0.0.1:8000'
@@ -20,6 +20,7 @@ db.init_redis(app)
 app.include_router(menu.router)
 app.include_router(submenu.router)
 app.include_router(dishes.router)
+app.include_router(common.router)
 
 
 @pytest.fixture(autouse=True)

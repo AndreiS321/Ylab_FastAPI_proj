@@ -9,14 +9,14 @@ from models import Dish
 class DishesAccessor(BaseAccessor):
     pydantic_model = DishOut
 
-    @cache_get_all(1)
+    @cache_get_all(20)
     async def get_list(self, menu_id: int, submenu_id: int) -> list[DishOut]:
         stmt = select(Dish).where(Dish.submenu_id == submenu_id)
         answ = (await self._session.scalars(stmt)).all()
         dishes_res = [await dish.to_pydantic_model(self._session) for dish in answ]
         return dishes_res
 
-    @cache_get(1)
+    @cache_get(20)
     async def get(self, menu_id: int, submenu_id: int, dish_id: int) -> DishOut | None:
         stmt = select(Dish).filter_by(id=dish_id)
         dish = await self._session.scalar(stmt)
@@ -25,7 +25,7 @@ class DishesAccessor(BaseAccessor):
         dish_res = await dish.to_pydantic_model(self._session)
         return dish_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def create(
         self,
         title: str,
@@ -47,7 +47,7 @@ class DishesAccessor(BaseAccessor):
         await self._session.commit()
         return dish_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def patch(
         self,
         title: str,

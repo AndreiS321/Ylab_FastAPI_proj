@@ -9,7 +9,7 @@ from models import Submenu
 class SubmenusAccessor(BaseAccessor):
     pydantic_model = SubmenuOut
 
-    @cache_get_all(1)
+    @cache_get_all(20)
     async def get_list(self, menu_id: int) -> list[SubmenuOut]:
         stmt = select(Submenu).where(Submenu.menu_id == menu_id)
         answer = (await self._session.scalars(stmt)).all()
@@ -18,7 +18,7 @@ class SubmenusAccessor(BaseAccessor):
         ]
         return submenus_res
 
-    @cache_get(1)
+    @cache_get(20)
     async def get(self, menu_id: int, submenu_id: int) -> SubmenuOut | None:
         stmt = select(Submenu).filter_by(id=submenu_id)
         submenu = await self._session.scalar(stmt)
@@ -27,7 +27,7 @@ class SubmenusAccessor(BaseAccessor):
         submenu_res = await submenu.to_pydantic_model(self._session)
         return submenu_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def create(self, title: str, description: str, menu_id: int) -> SubmenuOut:
         submenu = Submenu(menu_id=menu_id, title=title, description=description)
         self._session.add(submenu)
@@ -36,7 +36,7 @@ class SubmenusAccessor(BaseAccessor):
         await self._session.commit()
         return submenu_res
 
-    @cache_post(1)
+    @cache_post(20)
     async def patch(
         self, title: str, description: str, menu_id: int, submenu_id: int
     ) -> SubmenuOut | None:
