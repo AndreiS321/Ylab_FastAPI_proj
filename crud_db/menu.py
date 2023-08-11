@@ -1,52 +1,41 @@
 from sqlalchemy import delete, select, update
 
-from crud_db.utils import (
-    BaseAccessor,
-    cache_delete,
-    cache_get,
-    cache_get_all,
-    cache_post,
-)
-from dataclass import MenuDC
+from crud.pydantic_models import MenuOut
+from crud_db.base import BaseAccessor
+from crud_db.cache import cache_delete, cache_get, cache_get_all, cache_post
 from models import Menu
 
 
 class MenusAccessor(BaseAccessor):
-    dataclass = MenuDC
+    pydantic_model = MenuOut
 
     @cache_get_all(1)
-    async def get_list(self) -> list[MenuDC]:
+    async def get_list(self) -> list[MenuOut]:
         stmt = select(Menu)
         answ = (await self._session.scalars(stmt)).all()
-        menus_res = [await Menu.menu_to_dc(menu, self._session) for menu in answ]
+        menus_res = [await menu.to_pydantic_model(self._session) for menu in answ]
         return menus_res
 
     @cache_get(1)
-    async def get(self, menu_id: int) -> MenuDC | None:
+    async def get(self, menu_id: int) -> MenuOut | None:
         stmt = select(Menu).filter_by(id=menu_id)
         menu = await self._session.scalar(stmt)
         if not menu:
             return None
-        menu_res = await Menu.menu_to_dc(menu, self._session)
+        menu_res = await menu.to_pydantic_model(self._session)
         return menu_res
 
     @cache_post(1)
-    async def create(self, title: str, description: str) -> MenuDC:
+    async def create(self, title: str, description: str) -> MenuOut:
         menu = Menu(title=title, description=description)
         self._session.add(menu)
         await self._session.flush()
-        menu_res = MenuDC(
-            id=menu.id,
-            title=menu.title,
-            description=menu.description,
-            submenus_count=0,
-            dishes_count=0,
-        )
+        menu_res = await menu.to_pydantic_model(self._session)
         await self._session.commit()
         return menu_res
 
     @cache_post(1)
-    async def patch(self, title: str, description, menu_id: int) -> MenuDC | None:
+    async def patch(self, title: str, description, menu_id: int) -> MenuOut | None:
         stmt = select(Menu).where(Menu.id == menu_id)
         menu = await self._session.scalar(stmt)
         if not menu:
@@ -58,17 +47,17 @@ class MenusAccessor(BaseAccessor):
             .returning(Menu)
         )
         menu_res = await self._session.scalar(smtm)
-        menu_res = await Menu.menu_to_dc(menu_res, self._session)
+        menu_res = await menu_res.to_pydantic_model(self._session)
         await self._session.commit()
         return menu_res
 
     @cache_delete
-    async def delete(self, menu_id: int) -> MenuDC | None:
+    async def delete(self, menu_id: int) -> MenuOut | None:
         stmt = select(Menu).where(Menu.id == menu_id)
         menu = await self._session.scalar(stmt)
         if not menu:
             return None
-        menu_res = await Menu.menu_to_dc(menu, self._session)
+        menu_res = await menu.to_pydantic_model(self._session)
         smtm = delete(Menu).where(Menu.id == menu.id).returning(Menu)
         await self._session.execute(smtm)
         await self._session.commit()

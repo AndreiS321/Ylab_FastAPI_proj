@@ -42,7 +42,9 @@ async def test_create(client, menu: dict | None = None):
     )
 
 
-async def test_patch(client, session, menu_id: int | None = None, menu_updated: dict | None = None):
+async def test_patch(
+    client, session, menu_id: int | None = None, menu_updated: dict | None = None
+):
     menu_updated = menu_updated if menu_updated else menu1
     if menu_id is None:
         menu = await create_menu(menu1, session)

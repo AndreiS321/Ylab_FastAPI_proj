@@ -15,7 +15,9 @@ url_template_dish = Template(
 pytestmark = pytest.mark.anyio
 
 
-async def test_get_list(client, session, menu_id: int | None = None, submenu_id: int | None = None):
+async def test_get_list(
+    client, session, menu_id: int | None = None, submenu_id: int | None = None
+):
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
@@ -30,7 +32,11 @@ async def test_get_list(client, session, menu_id: int | None = None, submenu_id:
 
 
 async def test_get_dish(
-        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish_id: int | None = None
+    client,
+    session,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
+    dish_id: int | None = None,
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -54,7 +60,11 @@ async def test_get_dish(
 
 
 async def test_create(
-        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish: dict | None = None
+    client,
+    session,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
+    dish: dict | None = None,
 ):
     dish = dish if dish else dish1
     if menu_id is None:
@@ -81,12 +91,12 @@ async def test_create(
 
 
 async def test_patch(
-        client,
-        session,
-        menu_id: int | None = None,
-        submenu_id: int | None = None,
-        dish_id: int | None = None,
-        dish_updated: dict | None = None,
+    client,
+    session,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
+    dish_id: int | None = None,
+    dish_updated: dict | None = None,
 ):
     dish_updated = dish_updated if dish_updated else dish1_updated
     if menu_id is None:
@@ -116,7 +126,11 @@ async def test_patch(
 
 
 async def test_delete(
-        client, session, menu_id: int | None = None, submenu_id: int | None = None, dish_id: int | None = None
+    client,
+    session,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
+    dish_id: int | None = None,
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)

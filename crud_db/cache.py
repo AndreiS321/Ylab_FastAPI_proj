@@ -1,99 +1,96 @@
 from json import dumps, loads
 
-from fastapi import Depends
-
 from app import app
-from dataclass import DishDC, MenuDC, SubmenuDC
-from db import get_session
+from crud.pydantic_models import DishOut, MenuOut, SubmenuOut
 
 
-async def delete_related_cache_menu(obj: MenuDC):
+async def delete_related_cache_menu(obj: MenuOut):
     # Удаление кэша списка меню
-    await app.redis.delete(MenuDC.__name__)
+    await app.redis.delete(MenuOut.__name__)
 
     # Удаление кэша меню
-    name = get_cache_name(MenuDC.__name__, menu_id=obj.id)
+    name = get_cache_name(MenuOut.__name__, menu_id=obj.id)
     await app.redis.delete(name)
 
     # Удаление списка подменю и подменю, которые были в меню
-    async for key in app.redis.scan_iter(f'{SubmenuDC.__name__}menu_id{obj.id}*'):
+    async for key in app.redis.scan_iter(f'{SubmenuOut.__name__}menu_id{obj.id}*'):
         await app.redis.delete(key)
 
     # Удаление списка блюд и блюд, которые были в меню
-    async for key in app.redis.scan_iter(f'{DishDC.__name__}menu_id{obj.id}*'):
+    async for key in app.redis.scan_iter(f'{DishOut.__name__}menu_id{obj.id}*'):
         await app.redis.delete(key)
 
 
-async def delete_related_cache_submenu(obj: SubmenuDC):
+async def delete_related_cache_submenu(obj: SubmenuOut):
     # Удаление кэша списка меню
-    await app.redis.delete(MenuDC.__name__)
+    await app.redis.delete(MenuOut.__name__)
 
     # Удаление кэша меню
-    name = get_cache_name(MenuDC.__name__, menu_id=obj.menu_id)
+    name = get_cache_name(MenuOut.__name__, menu_id=obj.menu_id)
     await app.redis.delete(name)
 
     # Удаление кэша списка подменю
-    name = get_cache_name(SubmenuDC.__name__, menu_id=obj.menu_id)
+    name = get_cache_name(SubmenuOut.__name__, menu_id=obj.menu_id)
     await app.redis.delete(name)
 
     # Удаление кэша подменю
-    name = get_cache_name(SubmenuDC.__name__, menu_id=obj.menu_id, submenu_id=obj.id)
+    name = get_cache_name(SubmenuOut.__name__, menu_id=obj.menu_id, submenu_id=obj.id)
     await app.redis.delete(name)
 
     # Удаление списка блюд и блюд, которые были в меню
     async for key in app.redis.scan_iter(
-        f'{DishDC.__name__}menu_id{obj.menu_id}submenu_id{obj.id}*'
+        f'{DishOut.__name__}menu_id{obj.menu_id}submenu_id{obj.id}*'
     ):
         await app.redis.delete(key)
 
 
-async def delete_related_cache_dish(obj: DishDC):
+async def delete_related_cache_dish(obj: DishOut):
     # Удаление кэша списка меню
-    await app.redis.delete(MenuDC.__name__)
+    await app.redis.delete(MenuOut.__name__)
 
     # Удаление кэша меню
-    name = get_cache_name(MenuDC.__name__, menu_id=obj.menu_id)
+    name = get_cache_name(MenuOut.__name__, menu_id=obj.menu_id)
     await app.redis.delete(name)
 
     # Удаление кэша списка подменю
-    name = get_cache_name(SubmenuDC.__name__, menu_id=obj.menu_id)
+    name = get_cache_name(SubmenuOut.__name__, menu_id=obj.menu_id)
     await app.redis.delete(name)
 
     # Удаление кэша подменю
     name = get_cache_name(
-        SubmenuDC.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id
+        SubmenuOut.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id
     )
     await app.redis.delete(name)
 
     # Удаление кэша списка блюд
     name = get_cache_name(
-        DishDC.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id
+        DishOut.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id
     )
     await app.redis.delete(name)
 
     # Удаление кэша блюда
     name = get_cache_name(
-        DishDC.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id, dish_id=obj.id
+        DishOut.__name__, menu_id=obj.menu_id, submenu_id=obj.submenu_id, dish_id=obj.id
     )
     await app.redis.delete(name)
 
 
-async def delete_related_cache(obj: DishDC | SubmenuDC | MenuDC):
-    if isinstance(obj, MenuDC):
+async def delete_related_cache(obj: MenuOut | SubmenuOut | DishOut):
+    if isinstance(obj, MenuOut):
         await delete_related_cache_menu(obj)
-    elif isinstance(obj, SubmenuDC):
+    elif isinstance(obj, SubmenuOut):
         await delete_related_cache_submenu(obj)
-    elif isinstance(obj, DishDC):
+    elif isinstance(obj, DishOut):
         await delete_related_cache_dish(obj)
 
 
-def get_dataclass_cache_name(obj: MenuDC | SubmenuDC | DishDC):
+def get_model_cache_name(obj: MenuOut | SubmenuOut | DishOut):
     class_name = obj.__class__.__name__
-    if isinstance(obj, MenuDC):
+    if isinstance(obj, MenuOut):
         return f'{class_name}menu_id{obj.id}'
-    elif isinstance(obj, SubmenuDC):
+    elif isinstance(obj, SubmenuOut):
         return f'{class_name}menu_id{obj.menu_id}submenu_id{obj.id}'
-    elif isinstance(obj, DishDC):
+    elif isinstance(obj, DishOut):
         return (
             f'{class_name}menu_id{obj.menu_id}submenu_id{obj.submenu_id}dish_id{obj.id}'
         )
@@ -110,7 +107,7 @@ def get_cache_name(class_name, *args, **kwargs):
 def cache_get_all(seconds: int = 10):
     def wrapper1(func):
         async def wrapper2(self, *args, **kwargs):
-            name = get_cache_name(self.dataclass.__name__, **kwargs)
+            name = get_cache_name(self.pydantic_model.__name__, **kwargs)
             redis_value = await app.redis.get(name)
             if redis_value:
                 redis_value = loads(redis_value)
@@ -133,7 +130,7 @@ def cache_get_all(seconds: int = 10):
 def cache_get(seconds: int = 10):
     def wrapper1(func):
         async def wrapper2(self, *args, **kwargs):
-            name = get_cache_name(self.dataclass.__name__, **kwargs)
+            name = get_cache_name(self.pydantic_model.__name__, **kwargs)
             redis_value = await app.redis.get(name)
             if redis_value:
                 redis_value = loads(redis_value)
@@ -157,7 +154,7 @@ def cache_post(seconds: int = 10):
             if result is None:
                 return None
             await delete_related_cache(result)
-            name = get_cache_name(get_dataclass_cache_name(result))
+            name = get_model_cache_name(result)
             await app.redis.set(name, result.as_json, ex=seconds)
             return result
 
@@ -175,8 +172,3 @@ def cache_delete(func):
         return result
 
     return wrapper2
-
-
-class BaseAccessor:
-    def __init__(self, session=Depends(get_session)):
-        self._session = session

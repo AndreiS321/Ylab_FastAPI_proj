@@ -26,7 +26,7 @@ async def test_get_list(client, session, menu_id: int | None = None):
 
 
 async def test_get_submenu(
-        client, session, menu_id: int | None = None, submenu_id: int | None = None
+    client, session, menu_id: int | None = None, submenu_id: int | None = None
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -44,7 +44,9 @@ async def test_get_submenu(
     assert json_resp['id'] == str(submenu_id) and json_resp['menu_id'] == menu_id
 
 
-async def test_create(client, session, menu_id: int | None = None, submenu: dict | None = None):
+async def test_create(
+    client, session, menu_id: int | None = None, submenu: dict | None = None
+):
     submenu = submenu if submenu else submenu1
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -63,11 +65,11 @@ async def test_create(client, session, menu_id: int | None = None, submenu: dict
 
 
 async def test_patch(
-        client,
-        session,
-        menu_id: int | None = None,
-        submenu_id: int | None = None,
-        submenu_updated: dict | None = None,
+    client,
+    session,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
+    submenu_updated: dict | None = None,
 ):
     submenu_updated = submenu_updated if submenu_updated else submenu1_updated
     if menu_id is None:
@@ -91,7 +93,10 @@ async def test_patch(
 
 
 async def test_delete(
-        client, session: AsyncSession, menu_id: int | None = None, submenu_id: int | None = None
+    client,
+    session: AsyncSession,
+    menu_id: int | None = None,
+    submenu_id: int | None = None,
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)

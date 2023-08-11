@@ -13,6 +13,14 @@ class MenuOut(BaseModel):
     submenus_count: int
     dishes_count: int
 
+    @property
+    def as_json(self):
+        return self.model_dump_json()
+
+    @property
+    def as_dict(self):
+        return self.model_dump(mode='python')
+
 
 class SubmenuIn(BaseModel):
     title: str
@@ -25,6 +33,14 @@ class SubmenuOut(BaseModel):
     title: str
     description: str
     dishes_count: int
+
+    @property
+    def as_json(self):
+        return self.model_dump_json()
+
+    @property
+    def as_dict(self):
+        return self.model_dump(mode='python')
 
 
 class DishIn(BaseModel):
@@ -40,3 +56,15 @@ class DishOut(BaseModel):
     title: str
     description: str
     price: str
+
+    @property
+    def as_json(self):
+        return self.model_dump_json()
+
+    @property
+    def as_dict(self):
+        return self.model_dump(mode='python')
+
+
+# class ObjectsList(BaseModel):
+#     Men

@@ -2,7 +2,7 @@ from sqlalchemy import Float, ForeignKey, String, Text, distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from dataclass import DishDC, MenuDC, SubmenuDC
+from crud.pydantic_models import DishOut, MenuOut, SubmenuOut
 from sqlalchemy_base import db
 
 
@@ -21,20 +21,19 @@ class Menu(db):
         back_populates='menu', cascade='all, delete-orphan'
     )
 
-    @staticmethod
-    async def menu_to_dc(menu: 'Menu', session: AsyncSession) -> MenuDC:
+    async def to_pydantic_model(self, session: AsyncSession) -> MenuOut:
         smtm = (
             select(func.count(distinct(Submenu.id)), func.count(Dish.id))
             .select_from(Menu)
             .join(Submenu, Submenu.menu_id == Menu.id)
             .join(Dish, Dish.menu_id == Menu.id, isouter=True)
-            .where(Menu.id == menu.id)
+            .where(Menu.id == self.id)
         )
         count = (await session.execute(smtm)).one()
-        menu_res = MenuDC(
-            id=menu.id,
-            title=menu.title,
-            description=menu.description,
+        menu_res = MenuOut(
+            id=str(self.id),
+            title=self.title,
+            description=self.description,
             submenus_count=count[0],
             dishes_count=count[1],
         )
@@ -59,21 +58,20 @@ class Submenu(db):
         back_populates='submenu', cascade='all, delete-orphan'
     )
 
-    @staticmethod
-    async def submenu_to_dc(submenu: 'Submenu', session: AsyncSession) -> SubmenuDC:
+    async def to_pydantic_model(self, session: AsyncSession) -> SubmenuOut:
         smtm = (
             select(func.count(Dish.id))
             .select_from(Submenu)
             .join(Dish, Dish.submenu_id == Submenu.id)
-            .where(Submenu.id == submenu.id)
+            .where(Submenu.id == self.id)
         )
         count = (await session.execute(smtm)).one()
 
-        submenu_res = SubmenuDC(
-            id=submenu.id,
-            menu_id=submenu.menu_id,
-            title=submenu.title,
-            description=submenu.description,
+        submenu_res = SubmenuOut(
+            id=str(self.id),
+            menu_id=self.menu_id,
+            title=self.title,
+            description=self.description,
             dishes_count=count[0],
         )
         return submenu_res
@@ -99,15 +97,14 @@ class Dish(db):
     )
     submenu: Mapped['Submenu'] = relationship(back_populates='dishes')
 
-    @staticmethod
-    async def dish_to_dc(dish: 'Dish', session: AsyncSession) -> DishDC:
-        dish_res = DishDC(
-            id=dish.id,
-            menu_id=dish.menu_id,
-            submenu_id=dish.submenu_id,
-            title=dish.title,
-            description=dish.description,
-            price=dish.price,
+    async def to_pydantic_model(self, session: AsyncSession) -> DishOut:
+        dish_res = DishOut(
+            id=str(self.id),
+            menu_id=self.menu_id,
+            submenu_id=self.submenu_id,
+            title=self.title,
+            description=self.description,
+            price=str(round(self.price, 2)),
         )
         return dish_res
 
