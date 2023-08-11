@@ -74,3 +74,7 @@ class SubmenuOutList(BaseModel):
 class MenuOutList(BaseModel):
     menu: MenuOut | None = None
     submenus: list[SubmenuOutList] = []
+
+    @property
+    def as_dict(self):
+        return self.model_dump(mode='python')

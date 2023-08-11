@@ -1,7 +1,7 @@
 from json import dumps, loads
 
 from app import app
-from crud.pydantic_models import DishOut, MenuOut, SubmenuOut
+from crud.pydantic_models import DishOut, MenuOut, MenuOutList, SubmenuOut
 
 
 async def delete_related_cache_menu(obj: MenuOut):
@@ -75,6 +75,11 @@ async def delete_related_cache_dish(obj: DishOut):
     await app.redis.delete(name)
 
 
+async def delete_related_cache_common(obj):
+    # Удаление кэша списка всех объектов
+    await app.redis.delete(MenuOutList.__name__)
+
+
 async def delete_related_cache(obj: MenuOut | SubmenuOut | DishOut):
     if isinstance(obj, MenuOut):
         await delete_related_cache_menu(obj)
@@ -82,6 +87,7 @@ async def delete_related_cache(obj: MenuOut | SubmenuOut | DishOut):
         await delete_related_cache_submenu(obj)
     elif isinstance(obj, DishOut):
         await delete_related_cache_dish(obj)
+    await delete_related_cache_common(obj)
 
 
 def get_model_cache_name(obj: MenuOut | SubmenuOut | DishOut):

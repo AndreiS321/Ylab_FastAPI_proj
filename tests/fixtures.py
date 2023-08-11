@@ -32,9 +32,15 @@ async def setup_db():
         await conn.run_sync(sqlalchemy_base.db.metadata.drop_all)
 
 
+@pytest.fixture(autouse=True)
+async def setup_redis():
+    yield
+    await app.redis.flushall()
+
+
 @pytest.fixture()
 async def session() -> AsyncGenerator[AsyncSession, None]:
-    async with app.database.session_maker() as session:  # type: ignore
+    async with app.database.session_maker() as session:
         yield session
 
 
