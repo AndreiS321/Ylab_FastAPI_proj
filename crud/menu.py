@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import BackgroundTasks, Depends, HTTPException
 
 from crud.pydantic_models import MenuIn, MenuOut
 from crud.routers import router_menus as router
@@ -24,20 +24,25 @@ async def get_menu(
 
 @router.post('/', status_code=201)
 async def add_menu(
-    menu: MenuIn, accessor: MenusAccessor = Depends(MenusAccessor)
+    menu: MenuIn,
+    background_tasks: BackgroundTasks,
+    accessor: MenusAccessor = Depends(MenusAccessor),
 ) -> MenuOut:
-    res = await accessor.create(menu.title, menu.description)
+    res = await accessor.create(
+        menu.title, menu.description, background_tasks=background_tasks
+    )
     return res
 
 
 @router.patch('/{menu_id}')
 async def patch_menu(
-    menu_id: int, menu: MenuIn, accessor: MenusAccessor = Depends(MenusAccessor)
+    menu_id: int,
+    menu: MenuIn,
+    background_tasks: BackgroundTasks,
+    accessor: MenusAccessor = Depends(MenusAccessor),
 ) -> MenuOut:
     res = await accessor.patch(
-        menu.title,
-        menu.description,
-        menu_id=menu_id,
+        menu.title, menu.description, menu_id=menu_id, background_tasks=background_tasks
     )
     if not res:
         raise HTTPException(status_code=404, detail='menu not found')
@@ -46,9 +51,11 @@ async def patch_menu(
 
 @router.delete('/{menu_id}')
 async def delete_menu(
-    menu_id: int, accessor: MenusAccessor = Depends(MenusAccessor)
+    menu_id: int,
+    background_tasks: BackgroundTasks,
+    accessor: MenusAccessor = Depends(MenusAccessor),
 ) -> MenuOut:
-    res = await accessor.delete(menu_id=menu_id)
+    res = await accessor.delete(menu_id=menu_id, background_tasks=background_tasks)
     if not res:
         raise HTTPException(status_code=404, detail='menu not found')
     return res

@@ -10,14 +10,14 @@ class DishesAccessor(BaseAccessor):
     pydantic_model = DishOut
 
     @cache_get_all(20)
-    async def get_list(self, menu_id: int, submenu_id: int) -> list[DishOut]:
+    async def get_list(self, submenu_id: int, **kwargs) -> list[DishOut]:
         stmt = select(Dish).where(Dish.submenu_id == submenu_id)
         answ = (await self._session.scalars(stmt)).all()
         dishes_res = [await dish.to_pydantic_model(self._session) for dish in answ]
         return dishes_res
 
     @cache_get(20)
-    async def get(self, menu_id: int, submenu_id: int, dish_id: int) -> DishOut | None:
+    async def get(self, dish_id: int, **kwargs) -> DishOut | None:
         stmt = select(Dish).filter_by(id=dish_id)
         dish = await self._session.scalar(stmt)
         if not dish:
@@ -33,6 +33,7 @@ class DishesAccessor(BaseAccessor):
         price: float,
         menu_id: int,
         submenu_id: int,
+        **kwargs,
     ) -> DishOut:
         dish = Dish(
             menu_id=menu_id,
@@ -53,9 +54,8 @@ class DishesAccessor(BaseAccessor):
         title: str,
         description: str,
         price: float,
-        menu_id: int,
-        submenu_id: int,
         dish_id: int,
+        **kwargs,
     ) -> DishOut | None:
         stmt = select(Dish).where(Dish.id == dish_id)
         submenu = await self._session.scalar(stmt)
@@ -73,9 +73,7 @@ class DishesAccessor(BaseAccessor):
         return dish_res
 
     @cache_delete
-    async def delete(
-        self, menu_id: int, submenu_id: int, dish_id: int
-    ) -> DishOut | None:
+    async def delete(self, dish_id: int, **kwargs) -> DishOut | None:
         stmt = select(Dish).where(Dish.id == dish_id)
         dish = await self._session.scalar(stmt)
         if not dish:

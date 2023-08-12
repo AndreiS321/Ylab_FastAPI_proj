@@ -10,7 +10,7 @@ class CommonAccessor(BaseAccessor):
     pydantic_model = MenuOutList
 
     @cache_get_all(20)
-    async def get_list(self):
+    async def get_list(self, **kwargs):
         smtm = (
             select(Menu, Submenu, Dish)
             .select_from(Menu)
@@ -35,6 +35,7 @@ class CommonAccessor(BaseAccessor):
                     submenus=[],
                 )
             )
+
             for submenu in submenus:
                 if submenu and submenu.menu_id == menu.id:
                     result[cur_menu].submenus.append(
@@ -51,7 +52,8 @@ class CommonAccessor(BaseAccessor):
                                 await dish.to_pydantic_model(self._session)
                             )
 
-                cur_submenu += 1
+                    cur_submenu += 1
+            cur_submenu = 0
             cur_menu += 1
 
         return result

@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import BackgroundTasks, Depends, HTTPException
 
 from crud.pydantic_models import SubmenuIn, SubmenuOut
 from crud.routers import router_submenus as router
@@ -28,12 +28,14 @@ async def get_submenu(
 async def add_submenu(
     menu_id: int,
     submenu: SubmenuIn,
+    background_tasks: BackgroundTasks,
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
     res = await accessor.create(
         submenu.title,
         submenu.description,
         menu_id=menu_id,
+        background_tasks=background_tasks,
     )
     return res
 
@@ -43,6 +45,7 @@ async def patch_submenu(
     menu_id: int,
     submenu_id: int,
     submenu: SubmenuIn,
+    background_tasks: BackgroundTasks,
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
     res = await accessor.patch(
@@ -50,6 +53,7 @@ async def patch_submenu(
         submenu.description,
         menu_id=menu_id,
         submenu_id=submenu_id,
+        background_tasks=background_tasks,
     )
     if not res:
         raise HTTPException(status_code=404, detail='submenu not found')
@@ -60,9 +64,12 @@ async def patch_submenu(
 async def delete_submenu(
     menu_id: int,
     submenu_id: int,
+    background_tasks: BackgroundTasks,
     accessor: SubmenusAccessor = Depends(SubmenusAccessor),
 ) -> SubmenuOut:
-    res = await accessor.delete(menu_id=menu_id, submenu_id=submenu_id)
+    res = await accessor.delete(
+        menu_id=menu_id, submenu_id=submenu_id, background_tasks=background_tasks
+    )
     if not res:
         raise HTTPException(status_code=404, detail='submenu not found')
     return res

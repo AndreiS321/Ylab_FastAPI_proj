@@ -10,7 +10,7 @@ class SubmenusAccessor(BaseAccessor):
     pydantic_model = SubmenuOut
 
     @cache_get_all(20)
-    async def get_list(self, menu_id: int) -> list[SubmenuOut]:
+    async def get_list(self, menu_id: int, **kwargs) -> list[SubmenuOut]:
         stmt = select(Submenu).where(Submenu.menu_id == menu_id)
         answer = (await self._session.scalars(stmt)).all()
         submenus_res = [
@@ -19,7 +19,7 @@ class SubmenusAccessor(BaseAccessor):
         return submenus_res
 
     @cache_get(20)
-    async def get(self, menu_id: int, submenu_id: int) -> SubmenuOut | None:
+    async def get(self, submenu_id: int, **kwargs) -> SubmenuOut | None:
         stmt = select(Submenu).filter_by(id=submenu_id)
         submenu = await self._session.scalar(stmt)
         if not submenu:
@@ -28,7 +28,9 @@ class SubmenusAccessor(BaseAccessor):
         return submenu_res
 
     @cache_post(20)
-    async def create(self, title: str, description: str, menu_id: int) -> SubmenuOut:
+    async def create(
+        self, title: str, description: str, menu_id: int, **kwargs
+    ) -> SubmenuOut:
         submenu = Submenu(menu_id=menu_id, title=title, description=description)
         self._session.add(submenu)
         await self._session.flush()
@@ -38,7 +40,7 @@ class SubmenusAccessor(BaseAccessor):
 
     @cache_post(20)
     async def patch(
-        self, title: str, description: str, menu_id: int, submenu_id: int
+        self, title: str, description: str, submenu_id: int, **kwargs
     ) -> SubmenuOut | None:
         stmt = select(Submenu).where(Submenu.id == submenu_id)
         submenu = await self._session.scalar(stmt)
@@ -56,7 +58,7 @@ class SubmenusAccessor(BaseAccessor):
         return submenu_res
 
     @cache_delete
-    async def delete(self, menu_id: int, submenu_id: int) -> SubmenuOut | None:
+    async def delete(self, submenu_id: int, **kwargs) -> SubmenuOut | None:
         stmt = select(Submenu).where(Submenu.id == submenu_id)
         submenu = await self._session.scalar(stmt)
         if not submenu:

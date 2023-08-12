@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import BackgroundTasks, Depends, HTTPException
 
 from crud.pydantic_models import DishIn, DishOut
 from crud.routers import router_dishes as router
@@ -33,6 +33,7 @@ async def add_dish(
     menu_id: int,
     submenu_id: int,
     dish: DishIn,
+    background_tasks: BackgroundTasks,
     accessor: DishesAccessor = Depends(DishesAccessor),
 ) -> DishOut:
     res = await accessor.create(
@@ -41,6 +42,7 @@ async def add_dish(
         dish.price,
         menu_id=menu_id,
         submenu_id=submenu_id,
+        background_tasks=background_tasks,
     )
     return res
 
@@ -51,6 +53,7 @@ async def patch_dish(
     submenu_id: int,
     dish_id: int,
     dish: DishIn,
+    background_tasks: BackgroundTasks,
     accessor: DishesAccessor = Depends(DishesAccessor),
 ) -> DishOut:
     res = await accessor.patch(
@@ -60,6 +63,7 @@ async def patch_dish(
         menu_id=menu_id,
         submenu_id=submenu_id,
         dish_id=dish_id,
+        background_tasks=background_tasks,
     )
     if not res:
         raise HTTPException(status_code=404, detail='dish not found')
@@ -71,12 +75,14 @@ async def delete_dish(
     menu_id: int,
     submenu_id: int,
     dish_id: int,
+    background_tasks: BackgroundTasks,
     accessor: DishesAccessor = Depends(DishesAccessor),
 ) -> DishOut:
     res = await accessor.delete(
         menu_id=menu_id,
         submenu_id=submenu_id,
         dish_id=dish_id,
+        background_tasks=background_tasks,
     )
     if not res:
         raise HTTPException(status_code=404, detail='dish not found')
