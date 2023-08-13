@@ -2,7 +2,8 @@
 В репозитории представлен небольшой учебный проект на FastAPI, написанный в ходе прохождения курса от компании Y_LAB.
 # Установка
 ## Зависимости
-+ ### Redis (Кэш запросов к БД)
++ ### Redis
++ ### RabbitMQ
 + ### Postgresql
 + ### Python 3.10
 
@@ -25,11 +26,31 @@ pip install -r requirements.txt
 ```bash
 alembic upgrade head
 ```
-## Запуск
+# Запуск
+## Запуск приложения
 ```bash
 uvicorn main:app --reload
 ```
+# Celery
+## Настройка Celery
+Для использования Google sheets вместо файла  Excel нужно:
+1) Создать проект в Google Cloud
+2) Добавить Google sheets API в проект
+3) Создать сервисную почту и сгенерировать json-ключ
+4) Скопировать файл в папку проекта admin
+5) Прописать название файла в .env (по примеру из .env.example)
+6) Прописать id таблицы (https://docs.google.com/spreadsheets/d/id_таблицы/)
+## Запуск Celery
+### Celery worker
+```bash
+celery -A admin.tasks:app worker
+```
+### Celery beat
+```bash
+celery -A admin.tasks:app beat
+```
 
+# Docker
 ## Сборка образа docker-compose
 ```bash
 docker compose build

@@ -5,16 +5,19 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.dialects.postgresql import insert
 
 from admin.dataclasses import ExcelMenu
-from admin.parsers import parse_excel
+from admin.parsers import parse_excel, parse_google_sheet
 from config import load_environment_variables
 from models import Dish, Menu, Submenu
 
 load_environment_variables()
-broker_user = os.getenv('RABBIT_USER', default='guest')
-broker_password = os.getenv('RABBIT_PASSWORD', default='')
-broker_host = os.getenv('RABBIT_HOST', default='localhost')
-broker_port = os.getenv('RABBIT_PORT', default=5672)
-app = Celery('tasks', broker=f'pyamqp://{broker_user}:{broker_password}@{broker_host}:{broker_port}//')
+broker_user = os.getenv("RABBIT_USER", default="guest")
+broker_password = os.getenv("RABBIT_PASSWORD", default="")
+broker_host = os.getenv("RABBIT_HOST", default="localhost")
+broker_port = os.getenv("RABBIT_PORT", default=5672)
+app = Celery(
+    "tasks",
+    broker=f"pyamqp://{broker_user}:{broker_password}@{broker_host}:{broker_port}//",
+)
 
 
 @app.on_after_configure.connect
@@ -26,14 +29,14 @@ def setup_celery_excel_task(sender, **kwargs):
 def write_data_to_db(menus: list[dict]):
     """Принимает список ExcelMenu (в json)"""
     excel_menus: list[ExcelMenu] = [ExcelMenu(**menu) for menu in menus]
-    db_user: str | None = os.getenv('POSTGRES_USER', default='postgres')
-    db_password: str | None = os.getenv('POSTGRES_PASSWORD', default='postgres')
-    db_host: str | None = os.getenv('POSTGRES_HOST', default='database')
-    db_port: int | str | None = os.getenv('POSTGRES_PORT', default=5432)
-    db_name: str | None = os.getenv('POSTGRES_DB', default='postgres')
+    db_user: str | None = os.getenv("POSTGRES_USER", default="postgres")
+    db_password: str | None = os.getenv("POSTGRES_PASSWORD", default="postgres")
+    db_host: str | None = os.getenv("POSTGRES_HOST", default="database")
+    db_port: int | str | None = os.getenv("POSTGRES_PORT", default=5432)
+    db_name: str | None = os.getenv("POSTGRES_DB", default="postgres")
 
     engine = create_engine(
-        f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+        f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     )
     with engine.begin() as conn:
         for menu in excel_menus:
@@ -41,10 +44,10 @@ def write_data_to_db(menus: list[dict]):
             stmt = insert(Menu).values(title=menu.title, description=menu.description)
             resp = conn.execute(
                 stmt.on_conflict_do_update(
-                    constraint='unique_constraint_menu',
+                    constraint="unique_constraint_menu",
                     set_={
-                        'title': stmt.excluded.title,
-                        'description': stmt.excluded.description,
+                        "title": stmt.excluded.title,
+                        "description": stmt.excluded.description,
                     },
                 ).returning(Menu.id)
             )
@@ -58,10 +61,10 @@ def write_data_to_db(menus: list[dict]):
                 )
                 resp = conn.execute(
                     stmt.on_conflict_do_update(
-                        constraint='unique_constraint_submenu',
+                        constraint="unique_constraint_submenu",
                         set_={
-                            'title': stmt.excluded.title,
-                            'description': stmt.excluded.description,
+                            "title": stmt.excluded.title,
+                            "description": stmt.excluded.description,
                         },
                     ).returning(Submenu.id)
                 )
@@ -77,11 +80,11 @@ def write_data_to_db(menus: list[dict]):
                     )
                     resp = conn.execute(
                         stmt.on_conflict_do_update(
-                            constraint='unique_constraint_dish',
+                            constraint="unique_constraint_dish",
                             set_={
-                                'title': stmt.excluded.title,
-                                'description': stmt.excluded.description,
-                                'price': stmt.excluded.price,
+                                "title": stmt.excluded.title,
+                                "description": stmt.excluded.description,
+                                "price": stmt.excluded.price,
                             },
                         ).returning(Dish.id)
                     )
@@ -109,15 +112,18 @@ def write_data_to_db(menus: list[dict]):
 
 @app.task
 def get_data():
-    google_mode = os.getenv('GOOGLE_MODE')
+    google_mode = os.getenv("GOOGLE_MODE")
     google_mode = (
         bool(int(google_mode))
         if isinstance(google_mode, str) and google_mode.isdigit()
         else google_mode
     )
     if google_mode:
-        pass
+        key_file = os.getenv("GOOGLE_KEY")
+        sheet_id = os.getenv("SHEET_ID")
+        parsed_data_dict = parse_google_sheet(key_file=key_file, sheet_id=sheet_id)
+        write_data_to_db.delay(parsed_data_dict)
     else:
-        excel_file = os.getenv('EXCEL_FILE')
+        excel_file = os.getenv("EXCEL_FILE")
         parsed_data_dict = parse_excel(file=excel_file)
         write_data_to_db.delay(parsed_data_dict)

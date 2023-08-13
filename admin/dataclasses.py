@@ -9,7 +9,7 @@ class ExcelDish(BaseModel):
 
     @property
     def as_dict(self):
-        return self.model_dump(mode='python')
+        return self.model_dump(mode="python")
 
 
 class ExcelSubmenu(BaseModel):
@@ -20,7 +20,7 @@ class ExcelSubmenu(BaseModel):
 
     @property
     def as_dict(self):
-        return self.model_dump(mode='python')
+        return self.model_dump(mode="python")
 
 
 class ExcelMenu(BaseModel):
@@ -31,4 +31,4 @@ class ExcelMenu(BaseModel):
 
     @property
     def as_dict(self):
-        return self.model_dump(mode='python')
+        return self.model_dump(mode="python")
