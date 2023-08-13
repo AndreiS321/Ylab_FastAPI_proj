@@ -10,7 +10,58 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+    command: [ "/app/docker/app.sh" ]
 
+  celery_beat:
+    container_name: celery_beat
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    command: [ "/app/docker/celery_beat.sh" ]
+
+  celery:
+    container_name: celery
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+    command: [ "/app/docker/celery.sh" ]
+
+  redis:
+    image: redis:7
+    container_name: redis
+    command: --port 6379
+    expose:
+      - 6379
+
+  rabbitmq:
+    image: rabbitmq:3.9.29-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASSWORD}
 
   test_database:
     image: postgres:15.1-alpine
@@ -27,27 +78,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  app:
-    container_name: app
-    build:
-      context: .
-      dockerfile: Dockerfile_app
-    ports:
-      - 8000:8000
-    env_file:
-      - .env
-    depends_on:
-      database:
-        condition: service_healthy
-    command: [ "/app/docker/app.sh" ]
-
-  redis:
-    image: redis:7
-    container_name: redis
-    command: --port 6379
-    expose:
-      - 6379
 
   tests:
     container_name: tests_app

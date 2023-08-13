@@ -1,4 +1,13 @@
-from sqlalchemy import Float, ForeignKey, String, Text, distinct, func, select
+from sqlalchemy import (
+    Float,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    distinct,
+    func,
+    select,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -8,6 +17,10 @@ from sqlalchemy_base import db
 
 class Menu(db):
     __tablename__ = 'menu'
+
+    __table_args__ = (
+        UniqueConstraint('title', 'description', name='unique_constraint_menu'),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -22,7 +35,7 @@ class Menu(db):
     )
 
     async def to_pydantic_model(
-        self, session: AsyncSession, with_count=True
+            self, session: AsyncSession, with_count=True
     ) -> MenuOut:
         if with_count:
             smtm = (
@@ -54,6 +67,10 @@ class Menu(db):
 class Submenu(db):
     __tablename__ = 'submenu'
 
+    __table_args__ = (
+        UniqueConstraint('title', 'description', 'menu_id', name='unique_constraint_submenu'),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True)
 
     title: Mapped[str] = mapped_column(String(255))
@@ -67,7 +84,7 @@ class Submenu(db):
     )
 
     async def to_pydantic_model(
-        self, session: AsyncSession, with_count=True
+            self, session: AsyncSession, with_count=True
     ) -> SubmenuOut:
         if with_count:
             smtm = (
@@ -99,6 +116,10 @@ class Submenu(db):
 
 class Dish(db):
     __tablename__ = 'dish'
+
+    __table_args__ = (
+        UniqueConstraint('title', 'description', 'menu_id', 'submenu_id', name='unique_constraint_dish'),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
