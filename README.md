@@ -43,6 +43,7 @@ uvicorn main:app --reload
 Для использования нужно Excel файла для управления БД нужно:
 1) Создать Excel файл формата одного из форматов .xlsx,.xlsm,.xltx,.xltm
 2) Указать название файла в .env (по примеру из .env.example)
+
 Для использования Google sheets вместо файла  Excel нужно:
 1) Создать проект в Google Cloud
 2) Добавить Google sheets API в проект
