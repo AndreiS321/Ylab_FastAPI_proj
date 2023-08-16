@@ -41,7 +41,7 @@ uvicorn main:app --reload
 # Celery
 ## Настройка Celery
 Для использования нужно Excel файла для управления БД нужно:
-1) Создать Excel файл формата одного из форматов .xlsx,.xlsm,.xltx,.xltm
+1) Создать Excel файл одного из форматов .xlsx,.xlsm,.xltx,.xltm
 2) Указать название файла в .env (по примеру из .env.example)
 
 Для использования Google sheets вместо файла  Excel нужно:
