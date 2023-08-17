@@ -1,7 +1,9 @@
 from string import Template
 
 import pytest
+from httpx import AsyncClient
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Dish
 from tests.crud.utils import create_dish, create_menu, create_submenu
@@ -16,7 +18,7 @@ pytestmark = pytest.mark.anyio
 
 
 async def test_get_list(
-    client, session, menu_id: int | None = None, submenu_id: int | None = None
+    client: AsyncClient, session: AsyncSession, menu_id: int | None = None, submenu_id: int | None = None
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -32,8 +34,8 @@ async def test_get_list(
 
 
 async def test_get_dish(
-    client,
-    session,
+    client: AsyncClient,
+    session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,
     dish_id: int | None = None,
@@ -60,8 +62,8 @@ async def test_get_dish(
 
 
 async def test_create(
-    client,
-    session,
+    client: AsyncClient,
+    session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,
     dish: dict | None = None,
@@ -91,8 +93,8 @@ async def test_create(
 
 
 async def test_patch(
-    client,
-    session,
+    client: AsyncClient,
+    session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,
     dish_id: int | None = None,
@@ -126,8 +128,8 @@ async def test_patch(
 
 
 async def test_delete(
-    client,
-    session,
+    client: AsyncClient,
+    session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,
     dish_id: int | None = None,

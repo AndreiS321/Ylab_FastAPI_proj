@@ -1,5 +1,7 @@
 import pytest
+from httpx import AsyncClient
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Dish, Menu, Submenu
 from tests.crud import test_dish, test_menu, test_submenu
@@ -8,7 +10,7 @@ from tests.test_objects import dish1, dish2, menu1, submenu1
 pytestmark = pytest.mark.anyio
 
 
-async def test_count(client, session):
+async def test_count(client: AsyncClient, session: AsyncSession):
     # Создание меню
     await test_menu.test_create(client, menu=menu1)
     created_menu = await session.scalar(

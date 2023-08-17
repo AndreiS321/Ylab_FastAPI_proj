@@ -1,7 +1,9 @@
 from string import Template
 
 import pytest
+from httpx import AsyncClient
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Menu
 from tests.crud.utils import create_menu
@@ -12,13 +14,13 @@ url_template = Template(f'{base_url}/$menu_id')
 pytestmark = pytest.mark.anyio
 
 
-async def test_get_list(client):
+async def test_get_list(client: AsyncClient):
     resp = await client.get(base_url, follow_redirects=True)
 
     assert resp.status_code == 200
 
 
-async def test_get_menu(client, session, menu_id: int | None = None):
+async def test_get_menu(client: AsyncClient, session: AsyncSession, menu_id: int | None = None):
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
@@ -30,7 +32,7 @@ async def test_get_menu(client, session, menu_id: int | None = None):
     assert json_resp['id'] == str(menu_id)
 
 
-async def test_create(client, menu: dict | None = None):
+async def test_create(client: AsyncClient, menu: dict | None = None):
     menu = menu if menu else menu1
     resp = await client.post('/api/v1/menus', json=menu1, follow_redirects=True)
 
@@ -43,34 +45,33 @@ async def test_create(client, menu: dict | None = None):
 
 
 async def test_patch(
-    client, session, menu_id: int | None = None, menu_updated: dict | None = None
+    client: AsyncClient, session: AsyncSession, menu_id: int | None = None, menu_updated: dict | None = None
 ):
-    menu_updated = menu_updated if menu_updated else menu1
+    menu_updated = menu_updated if menu_updated else menu1_updated
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
     resp = await client.patch(
         url_template.substitute(menu_id=menu_id),
-        json=menu1_updated,
+        json=menu_updated,
         follow_redirects=True,
     )
 
     assert resp.status_code == 200
     json_resp = resp.json()
     assert (
-        json_resp['title'] == menu1_updated['title']
-        and json_resp['description'] == menu1_updated['description']
+        json_resp['title'] == menu_updated['title']
+        and json_resp['description'] == menu_updated['description']
     )
 
 
-async def test_delete(client, session, menu_id: int | None = None):
+async def test_delete(client: AsyncClient, session: AsyncSession, menu_id: int | None = None):
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
     resp = await client.delete(
         url_template.substitute(menu_id=menu_id), follow_redirects=True
     )
-
     assert resp.status_code == 200
     menu = await session.scalar(select(Menu).where(Menu.id == menu_id))
     assert menu is None

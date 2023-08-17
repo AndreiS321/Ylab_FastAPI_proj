@@ -10,7 +10,7 @@ class CommonAccessor(BaseAccessor):
     pydantic_model = MenuOutList
 
     @cache_get_all(20)
-    async def get_list(self, **kwargs):
+    async def get_list(self, **kwargs) -> list[MenuOutList]:
         smtm = (
             select(Menu, Submenu, Dish)
             .select_from(Menu)

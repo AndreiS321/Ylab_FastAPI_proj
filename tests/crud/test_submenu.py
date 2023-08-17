@@ -1,8 +1,9 @@
 from string import Template
 
 import pytest
-from sqlalchemy import select
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from models import Submenu
 from tests.crud.utils import create_menu, create_submenu
@@ -14,7 +15,7 @@ url_template_submenu = Template(base_url + '/${menu_id}/submenus/${submenu_id}')
 pytestmark = pytest.mark.anyio
 
 
-async def test_get_list(client, session, menu_id: int | None = None):
+async def test_get_list(client: AsyncClient, session: AsyncSession, menu_id: int | None = None):
     if menu_id is None:
         menu = await create_menu(menu1, session)
         menu_id = menu.id
@@ -26,7 +27,7 @@ async def test_get_list(client, session, menu_id: int | None = None):
 
 
 async def test_get_submenu(
-    client, session, menu_id: int | None = None, submenu_id: int | None = None
+    client: AsyncClient, session: AsyncSession, menu_id: int | None = None, submenu_id: int | None = None
 ):
     if menu_id is None:
         menu = await create_menu(menu1, session)
@@ -45,7 +46,7 @@ async def test_get_submenu(
 
 
 async def test_create(
-    client, session, menu_id: int | None = None, submenu: dict | None = None
+    client: AsyncClient, session: AsyncSession, menu_id: int | None = None, submenu: dict | None = None
 ):
     submenu = submenu if submenu else submenu1
     if menu_id is None:
@@ -65,8 +66,8 @@ async def test_create(
 
 
 async def test_patch(
-    client,
-    session,
+    client: AsyncClient,
+    session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,
     submenu_updated: dict | None = None,
@@ -93,7 +94,7 @@ async def test_patch(
 
 
 async def test_delete(
-    client,
+    client: AsyncClient,
     session: AsyncSession,
     menu_id: int | None = None,
     submenu_id: int | None = None,

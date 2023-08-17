@@ -39,12 +39,12 @@ async def setup_redis():
 
 
 @pytest.fixture()
-async def session() -> AsyncGenerator[AsyncSession, None]:
+async def session() -> AsyncSession:
     async with app.database.session_maker() as session:
         yield session
 
 
 @pytest.fixture(scope='session')
-async def client():
+async def client() -> AsyncClient:
     async with AsyncClient(app=app, base_url=base_url) as client:
         yield client
