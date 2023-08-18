@@ -2,14 +2,13 @@ from sqlalchemy import select
 
 from crud.pydantic_models import MenuOutList, SubmenuOutList
 from crud_db.base import BaseAccessor
-from crud_db.cache import cache_get_all
 from models import Dish, Menu, Submenu
 
 
 class CommonAccessor(BaseAccessor):
     pydantic_model = MenuOutList
 
-    @cache_get_all(20)
+
     async def get_list(self, **kwargs) -> list[MenuOutList]:
         smtm = (
             select(Menu, Submenu, Dish)
